@@ -50,6 +50,46 @@
             <div class="stats-grid" id="statsGrid">
                 <!-- الإحصائيات تظهر هنا -->
             </div>
+
+            <!-- قسم مزامنة البيانات -->
+            <div class="card" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                <h3 style="color: var(--primary); margin-bottom: 1.5rem; text-align: center;">🔗 مزامنة البيانات بين الأجهزة</h3>
+                
+                <div class="dashboard-grid">
+                    <div>
+                        <h4 style="color: var(--accent); margin-bottom: 1rem;">📤 تصدير البيانات</h4>
+                        <div class="form-group">
+                            <label>البيانات الحالية:</label>
+                            <textarea id="exportData" rows="4" readonly style="background: #fff; width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #e0e0e0; font-family: monospace;"></textarea>
+                        </div>
+                        <button onclick="exportData()" class="btn" style="width: 100%;">
+                            نسخ البيانات 📋
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: var(--accent); margin-bottom: 1rem;">📥 استيراد البيانات</h4>
+                        <div class="form-group">
+                            <label>الصق البيانات هنا:</label>
+                            <textarea id="importData" rows="4" placeholder="الصق البيانات المستوردة هنا..." style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #e0e0e0; font-family: monospace;"></textarea>
+                        </div>
+                        <button onclick="importData()" class="btn btn-secondary" style="width: 100%;">
+                            استيراد البيانات 🔄
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; padding: 1rem; background: white; border-radius: 10px; border-right: 4px solid var(--secondary);">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">💡 طريقة الاستخدام:</h4>
+                    <ol style="color: #555; line-height: 1.6; padding-right: 1rem;">
+                        <li>من <strong>الجهاز الأول</strong>: اضغطي "نسخ البيانات"</li>
+                        <li>انسخي النص من المربع الأعلى</li>
+                        <li>أرسلي النص لل<strong>جهاز الثاني</strong></li>
+                        <li>من <strong>الجهاز الثاني</strong>: الصقي النص في المربع الأسفل</li>
+                        <li>اضغطي "استيراد البيانات"</li>
+                    </ol>
+                </div>
+            </div>
             
             <div class="card">
                 <h3 style="color: var(--primary); margin-bottom: 1.5rem;">قائمة الطالبات والطلبات</h3>
@@ -162,10 +202,37 @@
                     </td>
                 </tr>
             `).join('');
+
+            // تعبئة بيانات التصدير
+            document.getElementById('exportData').value = galleryApp.exportData();
         }
 
         function editStudent(studentId) {
             window.location.href = `admin-student.html?id=${studentId}`;
+        }
+
+        // تصدير البيانات
+        function exportData() {
+            const exportTextarea = document.getElementById('exportData');
+            exportTextarea.select();
+            document.execCommand('copy');
+            showMessage('✅ تم نسخ البيانات! الصقيها في الجهاز الآخر', 'success');
+        }
+
+        // استيراد البيانات
+        function importData() {
+            const importData = document.getElementById('importData').value;
+            if (!importData.trim()) {
+                showMessage('❌ الرجاء لصق البيانات أولاً', 'error');
+                return;
+            }
+
+            if (galleryApp.importData(importData)) {
+                showMessage('✅ تم استيراد البيانات بنجاح!', 'success');
+                renderAdminPanel(); // إعادة تحميل الجدول
+            } else {
+                showMessage('❌ خطأ في استيراد البيانات - تأكدي من صحة النص', 'error');
+            }
         }
 
         // تسجيل الدخول
