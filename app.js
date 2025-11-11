@@ -232,24 +232,76 @@ class ArtGallery {
         };
     }
 
-    // تصدير البيانات (للاستخدام المستقبلي)
+    // تصدير البيانات
     exportData() {
         return JSON.stringify(this.students, null, 2);
     }
 
-    // استيراد البيانات (للاستخدام المستقبلي)
+    // استيراد البيانات
     importData(jsonData) {
         try {
             const importedData = JSON.parse(jsonData);
             if (Array.isArray(importedData)) {
                 this.students = importedData;
                 this.saveToStorage();
+                console.log('✅ تم استيراد البيانات بنجاح');
                 return true;
             }
         } catch (error) {
-            console.error('خطأ في استيراد البيانات:', error);
+            console.error('❌ خطأ في استيراد البيانات:', error);
         }
         return false;
+    }
+
+    // حذف طالبة
+    deleteStudent(studentId) {
+        const initialLength = this.students.length;
+        this.students = this.students.filter(student => student.id != studentId);
+        
+        if (this.students.length < initialLength) {
+            this.saveToStorage();
+            console.log('🗑️ تم حذف الطالبة');
+            return true;
+        }
+        return false;
+    }
+
+    // تصفية الطالبات حسب الحالة
+    filterStudents(filterType) {
+        switch (filterType) {
+            case 'all':
+                return this.students;
+            case 'with_drawing':
+                return this.students.filter(s => s.wants_drawing);
+            case 'completed_drawings':
+                return this.students.filter(s => s.drawing_completed);
+            case 'pending_drawings':
+                return this.students.filter(s => s.wants_drawing && !s.drawing_completed);
+            default:
+                return this.students;
+        }
+    }
+
+    // الحصول على آخر الطالبات المسجلات
+    getRecentStudents(limit = 5) {
+        return this.students
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .slice(0, limit);
+    }
+
+    // التحقق من وجود طالبة بالاسم
+    studentExists(name) {
+        return this.students.some(student => 
+            student.name.toLowerCase() === name.toLowerCase()
+        );
+    }
+
+    // إعادة تعيين البيانات
+    resetData() {
+        this.students = [];
+        this.saveToStorage();
+        console.log('🔄 تم إعادة تعيين البيانات');
+        return true;
     }
 }
 
@@ -283,25 +335,6 @@ function showMessage(message, type = 'success') {
     }, 5000);
 }
 
-// إضافة أنيميشن للرسائل
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @keyframes fadeOut {
-        from { opacity: 1; transform: translateY(0); }
-        to { opacity: 0; transform: translateY(-20px); }
-    }
-    
-    .message, .error {
-        animation: fadeIn 0.5s ease-in;
-    }
-`;
-document.head.appendChild(style);
-
 // تحسين تجربة المستخدم على الأجهزة المحمولة
 function optimizeMobileExperience() {
     if (window.innerWidth <= 768) {
@@ -326,30 +359,122 @@ document.addEventListener('DOMContentLoaded', function() {
         card.style.animation = 'fadeInUp 0.6s ease-out';
     });
 
-    // إضافة أنيميشن للكروت
-    const cardAnimationStyle = document.createElement('style');
-    cardAnimationStyle.textContent = `
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .art-card, .step {
-            animation: fadeInUp 0.6s ease-out;
-        }
-    `;
-    document.head.appendChild(cardAnimationStyle);
+    // التحقق من البيانات المستوردة من الرابط
+    checkForImportedData();
 });
+
+// التحقق من البيانات المستوردة تلقائياً من الرابط
+function checkForImportedData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const encodedData = urlParams.get('data');
+    
+    if (encodedData) {
+        try {
+            const data = decodeURIComponent(atob(encodedData));
+            if (galleryApp.importData(data)) {
+                showMessage('✅ تم استيراد البيانات تلقائياً من الرابط!', 'success');
+                // إزالة المعامل من الرابط
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        } catch (error) {
+            console.log('⚠️ خطأ في الاستيراد التلقائي');
+        }
+    }
+}
+
+// إنشاء رابط مشاركة للبيانات
+function createShareLink() {
+    const data = galleryApp.exportData();
+    const encodedData = btoa(encodeURIComponent(data));
+    const currentUrl = window.location.origin + window.location.pathname;
+    return `${currentUrl}?data=${encodedData}`;
+}
+
+// نسخ رابط المشاركة
+function copyShareLink() {
+    const shareLink = createShareLink();
+    navigator.clipboard.writeText(shareLink).then(() => {
+        showMessage('✅ تم نسخ رابط المشاركة!', 'success');
+    }).catch(() => {
+        // بديل إذا لم يدعم clipboard API
+        const tempInput = document.createElement('input');
+        tempInput.value = shareLink;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        showMessage('✅ تم نسخ رابط المشاركة!', 'success');
+    });
+}
+
+// إضافة أنيميشن للرسائل والكروت
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(-20px); }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .message, .error {
+        animation: fadeIn 0.5s ease-in;
+    }
+    
+    .art-card, .step {
+        animation: fadeInUp 0.6s ease-out;
+    }
+`;
+document.head.appendChild(style);
+
+// وظائف مساعدة إضافية
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+function validatePhone(phone) {
+    const phoneRegex = /^05\d{8}$/;
+    return phoneRegex.test(phone);
+}
+
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
 
 // إنشاء نسخة عامة من التطبيق
 const galleryApp = new ArtGallery();
 
-// جعل التطبيق متاحاً globally للاستخدام في الملفات الأخرى
+// جعل التطبيق والوظائف المساعدة متاحة globally
 window.galleryApp = galleryApp;
 window.showMessage = showMessage;
+window.formatDate = formatDate;
+window.validatePhone = validatePhone;
+window.validateEmail = validateEmail;
+window.createShareLink = createShareLink;
+window.copyShareLink = copyShareLink;
+window.checkForImportedData = checkForImportedData;
+
+// تصدير للاستخدام في الموديولات (إذا احتاج مستقبلاً)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { ArtGallery, galleryApp };
+}
