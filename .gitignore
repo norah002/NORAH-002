@@ -1,0 +1,19 @@
+# بيانات التطبيق
+students_data.json
+uploads/
+drawings/
+
+# سجلات النظام
+*.log
+
+# ملفات البيئة
+.env
+config.php
+
+# ملفات النظام
+.DS_Store
+Thumbs.db
+
+# نسخ احتياطية
+*.bak
+*.tmp
