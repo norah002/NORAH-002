@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معلومات الرسمة - معرض الرسومات</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="main-header">
+        <h1>معلومات الرسمة الشخصية</h1>
+        <div class="subtitle">حطينا المعلومات اللي راح تساعدني أرسملك</div>
+    </header>
+
+    <div class="container">
+        <div id="messageContainer"></div>
+
+        <div class="card">
+            <h2 style="text-align: center; color: var(--primary); margin-bottom: 1.5rem;" id="studentName">
+                ياهلا! 🌟
+            </h2>
+            <p style="text-align: center; margin-bottom: 2rem; color: #666; font-size: 1.1rem;">
+                الحين حطينا المعلومات اللي راح تساعدني أرسملك رسمة تعبر عن شخصيتك!
+            </p>
+            
+            <form id="drawingForm">
+                <input type="hidden" id="studentId" name="student_id">
+                
+                <div class="dashboard-grid">
+                    <div>
+                        <h3 style="color: var(--primary); margin-bottom: 1.5rem; border-right: 4px solid var(--secondary); padding-right: 1rem;">معلوماتك الشخصية</h3>
+                        
+                        <div class="form-group">
+                            <label>لون شعرك:</label>
+                            <input type="text" name="hair_color" required placeholder="مثلاً: أسود، بني، أشقر، أصهب...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>لون عيونك:</label>
+                            <input type="text" name="eye_color" required placeholder="مثلاً: بني، أسود، أخضر، أزرق...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>لونك المفضل:</label>
+                            <input type="color" name="favorite_color" value="#2c3e50" required style="height: 60px; border-radius: 10px;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>لون بشرتك:</label>
+                            <input type="text" name="skin_tone" required placeholder="مثلاً: فاتح، قمحي، زيتوني، غامق...">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 style="color: var(--primary); margin-bottom: 1.5rem; border-right: 4px solid var(--secondary); padding-right: 1rem;">تفاصيل الرسمة</h3>
+                        
+                        <div class="form-group">
+                            <label>شكل الشعر اللي تبينه:</label>
+                            <textarea name="hair_style" rows="3" required placeholder="مثلاً: طويل ومموج، قصير ومستقيم، كيرلي، ضفاير..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>اللبس اللي تحبينه:</label>
+                            <textarea name="clothing" rows="3" required placeholder="مثلاً: فستان، جينس وتيشيرت، عباية، لبس تقليدي..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>أي إضافات أو أفكار ثانية:</label>
+                            <textarea name="additional_notes" rows="3" placeholder="إذا عندك أي أفكار خاصة أو تفاصيل إضافية تبينها في الرسمة..."></textarea>
+                        </div>
+                        
+                        <div style="background: #e8f4f8; padding: 1.5rem; border-radius: 12px; margin-top: 2rem;">
+                            <h4 style="color: var(--accent); margin-bottom: 0.5rem;">💡 نصيحة:</h4>
+                            <p style="color: #2c3e50; margin: 0; line-height: 1.6;">
+                                كل ما كانت المعلومات أدق، بتكون الرسمة أقرب لشخصيتك الحقيقية!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn" style="width: 100%; margin-top: 2rem; font-size: 1.2rem;">
+                    حفظ المعلومات وطلب الرسمة 🎨
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // جلب معلومات الطالبة من الـ URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentId = urlParams.get('id');
+        
+        document.getElementById('studentId').value = studentId;
+
+        // تحميل بيانات الطالبة
+        window.addEventListener('load', function() {
+            const student = galleryApp.students.find(s => s.id == studentId);
+            if (student) {
+                document.getElementById('studentName').textContent = `ياهلا ${student.name}! 🌟`;
+            }
+        });
+
+        // معالجة النموذج
+        document.getElementById('drawingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const drawingInfo = {
+                hair_color: formData.get('hair_color'),
+                eye_color: formData.get('eye_color'),
+                favorite_color: formData.get('favorite_color'),
+                skin_tone: formData.get('skin_tone'),
+                hair_style: formData.get('hair_style'),
+                clothing: formData.get('clothing'),
+                additional_notes: formData.get('additional_notes'),
+                info_completed: true
+            };
+
+            // تحديث معلومات الطالبة
+            const studentIndex = galleryApp.students.findIndex(s => s.id == studentId);
+            if (studentIndex !== -1) {
+                galleryApp.students[studentIndex] = {
+                    ...galleryApp.students[studentIndex],
+                    ...drawingInfo
+                };
+                galleryApp.saveData();
+            }
+
+            showMessage('تم حفظ معلومات الرسمة بنجاح! سيتم إعلامك عند اكتمال الرسمة', 'success');
+            
+            setTimeout(() => {
+                window.location.href = `success.html?id=${studentId}`;
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

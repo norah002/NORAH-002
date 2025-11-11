@@ -1,0 +1,44 @@
+[
+    {
+        "id": 1,
+        "name": "نورة أحمد",
+        "phone": "0500000001",
+        "wants_drawing": true,
+        "drawing_completed": false,
+        "created_at": "2025-01-15T10:00:00.000Z",
+        "info_completed": true,
+        "hair_color": "أسود",
+        "eye_color": "بني",
+        "favorite_color": "#2c3e50",
+        "skin_tone": "قمحي",
+        "hair_style": "طويل ومستقيم",
+        "clothing": "عباية سوداء",
+        "additional_notes": "أحب الألوان الدافئة"
+    },
+    {
+        "id": 2,
+        "name": "فاطمة محمد",
+        "phone": "0500000002",
+        "wants_drawing": true,
+        "drawing_completed": true,
+        "created_at": "2025-01-16T11:30:00.000Z",
+        "info_completed": true,
+        "hair_color": "بني",
+        "eye_color": "أخضر",
+        "favorite_color": "#d4af37",
+        "skin_tone": "فاتح",
+        "hair_style": "قصير ومموج",
+        "clothing": "جينس وبلوزة",
+        "additional_notes": "الرسمة كانت رائعة!",
+        "drawing_path": "https://via.placeholder.com/400x300/FF6B6B/FFFFFF?text=رسمة+فاطمة"
+    },
+    {
+        "id": 3,
+        "name": "سارة الخالد",
+        "phone": "0500000003",
+        "wants_drawing": false,
+        "drawing_completed": false,
+        "created_at": "2025-01-17T14:20:00.000Z",
+        "info_completed": true
+    }
+]

@@ -1,0 +1,43 @@
+# ملفات النظام
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+
+# سجلات النظام
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# بيئة التطوير
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# مجلدات التبعيات
+node_modules/
+bower_components/
+
+# ملفات النسخ الاحتياطي
+*.bak
+*.backup
+
+# نظام التحكم بالإصدار
+.git/
+
+# ملفات نظام التشغيل
+Desktop.ini
+
+# ملفات IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ملفات التخزين المؤقت
+uploads/
+drawings/
+temp/

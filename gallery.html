@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المعرض - معرض الرسومات</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="main-header">
+        <h1>🎨 معرض الرسمات</h1>
+        <div class="subtitle">شاهدي إبداعات الرسومات الشخصية</div>
+    </header>
+
+    <div class="container">
+        <div class="nav-container">
+            <div class="navigation">
+                <a href="index.html" class="nav-btn">الرئيسية</a>
+                <a href="register.html" class="nav-btn">إنشاء حساب</a>
+                <a href="gallery.html" class="nav-btn active">المعرض</a>
+                <a href="admin.html" class="nav-btn">دخول الإدارة</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="text-align: center; color: var(--primary); margin-bottom: 2rem;">🎨 معرض الرسمات</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 2rem; font-size: 1.1rem;">
+                هذا المعرض يضم كل الرسمات الشخصية اللي طلبتها الصديقات. كل رسمة بتكون مبنية على المعلومات الشخصية لكل وحدة!
+            </p>
+            
+            <div class="search-box">
+                <form id="searchForm">
+                    <input type="text" id="searchInput" placeholder="ابحثي باسم الصديقة...">
+                    <button type="submit" class="btn">بحث</button>
+                </form>
+            </div>
+
+            <div class="gallery" id="galleryContainer">
+                <!-- المحتوى يظهر بالجافاسكريبت -->
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        function renderGallery(students = null) {
+            const galleryContainer = document.getElementById('galleryContainer');
+            const studentsToShow = students || galleryApp.students.filter(s => s.wants_drawing);
+            
+            if (studentsToShow.length === 0) {
+                galleryContainer.innerHTML = `
+                    <div class="no-data" style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--accent); background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">😊</div>
+                        <h3 style="color: var(--primary); margin-bottom: 1rem;">ما في رسومات لعرضها الحين</h3>
+                        <p style="color: #666; margin-bottom: 2rem;">يمكنكِ تكوني أول وحدة تطلبين رسمة!</p>
+                        <a href="register.html" class="btn">اطلبي رسمة!</a>
+                    </div>
+                `;
+                return;
+            }
+
+            galleryContainer.innerHTML = studentsToShow.map(student => `
+                <div class="art-card ${student.drawing_completed ? 'completed-drawing' : ''}">
+                    <div class="no-image">🖼️ صورة ${student.name}</div>
+                    
+                    <div class="art-card-content">
+                        <h3>${student.name}</h3>
+                        
+                        <div class="drawing-status ${student.drawing_completed ? 'status-completed' : 'status-pending'}">
+                            ${student.drawing_completed ? '✅ الرسمة مكتملة' : '🟡 جاري العمل على الرسمة'}
+                        </div>
+                        
+                        ${student.info_completed ? `
+                            <div class="art-details">
+                                <p><strong>لون الشعر:</strong> ${student.hair_color}</p>
+                                <p><strong>لون العيون:</strong> ${student.eye_color}</p>
+                                <p><strong>اللون المفضل:</strong> 
+                                    <span class="color-box" style="background-color: ${student.favorite_color}"></span>
+                                </p>
+                            </div>
+                        ` : ''}
+                        
+                        ${student.drawing_completed && student.drawing_path ? `
+                            <div style="margin-top: 1.5rem;">
+                                <a href="${student.drawing_path}" target="_blank" class="btn" style="width: 100%;">👀 شوفي الرسمة النهائية</a>
+                            </div>
+                        ` : `
+                            <div class="artwork-placeholder">
+                                ${student.drawing_completed ? 'الرسمة جاهزة! 🎉' : 'جاري إنشاء الرسمة... ⏳'}
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // البحث
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const searchTerm = document.getElementById('searchInput').value;
+            
+            if (searchTerm.trim()) {
+                const filteredStudents = galleryApp.searchStudents(searchTerm);
+                renderGallery(filteredStudents);
+            } else {
+                renderGallery();
+            }
+        });
+
+        // تحميل المعرض عند فتح الصفحة
+        window.addEventListener('load', function() {
+            renderGallery();
+        });
+    </script>
+</body>
+</html>

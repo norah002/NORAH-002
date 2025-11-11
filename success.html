@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تم بنجاح - معرض الرسومات</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="main-header">
+        <h1>🎉 تم بنجاح!</h1>
+        <div class="subtitle">طلبك تم تسجيله بنجاح</div>
+    </header>
+
+    <div class="container">
+        <div class="card" style="text-align: center;">
+            <div style="font-size: 5rem; margin-bottom: 1.5rem;">🎉</div>
+            <h2 style="color: var(--primary); margin-bottom: 1.5rem; font-size: 2rem;">ما شاء الله! تم بنجاح</h2>
+            <p style="font-size: 1.3rem; margin-bottom: 1.5rem; line-height: 1.8;" id="successMessage">
+                تم حفظ معلوماتك وطلب الرسمة بنجاح! 
+            </p>
+            <p style="margin-bottom: 2rem; color: #666; font-size: 1.1rem; line-height: 1.7;">
+                راح أبدأ بالرسمة على طول وأبذل كل جهدي عشان تطلع زي ما تتمنين. 
+                أول ما أنتهي راح أرسل لكِ رسالة على الجوال وتقدرين تشوفينها في المعرض!
+            </p>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+                <a href="gallery.html" class="btn">شوفي المعرض 🖼️</a>
+                <a href="index.html" class="btn btn-secondary">الرئيسية 🏠</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // جلب معلومات الطالبة من الـ URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentId = urlParams.get('id');
+        
+        // عرض اسم الطالبة في رسالة النجاح
+        window.addEventListener('load', function() {
+            const student = galleryApp.students.find(s => s.id == studentId);
+            if (student) {
+                document.getElementById('successMessage').innerHTML = 
+                    `عزيزتي <strong>${student.name}</strong>، 
+                    تم حفظ معلوماتك وطلب الرسمة بنجاح!`;
+            }
+        });
+    </script>
+</body>
+</html>

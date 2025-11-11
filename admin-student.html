@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفاصيل الطالبة - الإدارة</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="main-header">
+        <h1>👩‍🎓 تفاصيل الطالبة</h1>
+        <div class="subtitle">إدارة معلومات الطالبة والرسمة</div>
+    </header>
+
+    <div class="container">
+        <div class="nav-container">
+            <div class="navigation">
+                <a href="admin.html" class="nav-btn">← العودة للإدارة</a>
+            </div>
+        </div>
+
+        <div id="messageContainer"></div>
+
+        <div class="card">
+            <h2 style="text-align: center; color: var(--primary); margin-bottom: 2rem;" id="pageTitle">
+                تفاصيل الطالبة
+            </h2>
+            
+            <div class="dashboard-grid">
+                <div>
+                    <h3 style="color: var(--primary); margin-bottom: 1.5rem; border-right: 4px solid var(--secondary); padding-right: 1rem;">المعلومات الأساسية</h3>
+                    
+                    <div class="student-info-card" id="basicInfo">
+                        <!-- المعلومات الأساسية تظهر هنا -->
+                    </div>
+                    
+                    <div class="student-info-card" id="drawingInfo" style="display: none;">
+                        <!-- معلومات الرسمة تظهر هنا -->
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 style="color: var(--primary); margin-bottom: 1.5rem; border-right: 4px solid var(--secondary); padding-right: 1rem;">إدارة الرسمة</h3>
+                    
+                    <form id="drawingManagementForm">
+                        <input type="hidden" id="studentId" name="student_id">
+                        
+                        <div class="form-group">
+                            <label>حالة الرسمة:</label>
+                            <select name="drawing_completed" required style="padding: 1rem; font-size: 1rem;">
+                                <option value="false">🟡 قيد العمل</option>
+                                <option value="true">✅ مكتملة</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>رابط الرسمة النهائية:</label>
+                            <input type="url" name="drawing_path" placeholder="https://example.com/drawing.jpg" style="padding: 1rem;">
+                        </div>
+                        
+                        <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">حفظ التغييرات</button>
+                    </form>
+                    
+                    <div id="completionMessage" style="display: none;" class="message" style="margin-top: 1.5rem;">
+                        ✅ تم إرسال إشعار للطالبة باكتمال الرسمة
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // التحقق من تسجيل الدخول
+        function checkAuth() {
+            return localStorage.getItem('adminLoggedIn') === 'true';
+        }
+
+        // جلب معلومات الطالبة
+        function loadStudentData() {
+            if (!checkAuth()) {
+                window.location.href = 'admin.html';
+                return;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const studentId = urlParams.get('id');
+            
+            document.getElementById('studentId').value = studentId;
+
+            const student = galleryApp.students.find(s => s.id == studentId);
+            if (student) {
+                renderStudentData(student);
+            }
+        }
+
+        function renderStudentData(student) {
+            // عنوان الصفحة
+            document.getElementById('pageTitle').textContent = `تفاصيل الطالبة: ${student.name}`;
+
+            // المعلومات الأساسية
+            document.getElementById('basicInfo').innerHTML = `
+                <p><strong>📞 رقم الجوال:</strong> ${student.phone || 'غير محدد'}</p>
+                <p><strong>🎨 طلب رسمة:</strong> ${student.wants_drawing ? '✅ نعم' : '❌ لا'}</p>
+                <p><strong>📅 تاريخ التسجيل:</strong> ${new Date(student.created_at).toLocaleDateString('ar-SA')}</p>
+            `;
+
+            // معلومات الرسمة
+            if (student.wants_drawing && student.info_completed) {
+                document.getElementById('drawingInfo').style.display = 'block';
+                document.getElementById('drawingInfo').innerHTML = `
+                    <h4 style="color: var(--accent); margin-bottom: 1rem;">معلومات الرسمة:</h4>
+                    <p><strong>👱‍♀️ لون الشعر:</strong> ${student.hair_color}</p>
+                    <p><strong>👁️ لون العيون:</strong> ${student.eye_color}</p>
+                    <p><strong>🎨 اللون المفضل:</strong> 
+                        <span class="color-box" style="background-color: ${student.favorite_color}"></span>
+                        ${student.favorite_color}
+                    </p>
+                    <p><strong>🌟 لون البشرة:</strong> ${student.skin_tone}</p>
+                    <p><strong>💇 تسريحة الشعر:</strong> ${student.hair_style}</p>
+                    <p><strong>👗 اللباس:</strong> ${student.clothing}</p>
+                    ${student.additional_notes ? `<p><strong>💬 ملاحظات إضافية:</strong> ${student.additional_notes}</p>` : ''}
+                `;
+            }
+
+            // تعبئة النموذج
+            document.querySelector('select[name="drawing_completed"]').value = student.drawing_completed ? 'true' : 'false';
+            document.querySelector('input[name="drawing_path"]').value = student.drawing_path || '';
+
+            // عرض رسالة الإكمال
+            if (student.drawing_completed) {
+                document.getElementById('completionMessage').style.display = 'block';
+            }
+        }
+
+        // تحديث معلومات الرسمة
+        document.getElementById('drawingManagementForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const studentId = document.getElementById('studentId').value;
+            const drawingCompleted = document.querySelector('select[name="drawing_completed"]').value === 'true';
+            const drawingPath = document.querySelector('input[name="drawing_path"]').value;
+
+            const studentIndex = galleryApp.students.findIndex(s => s.id == studentId);
+            if (studentIndex !== -1) {
+                galleryApp.students[studentIndex].drawing_completed = drawingCompleted;
+                galleryApp.students[studentIndex].drawing_path = drawingPath;
+                galleryApp.saveData();
+
+                showMessage('تم تحديث حالة الرسمة بنجاح', 'success');
+                
+                if (drawingCompleted) {
+                    document.getElementById('completionMessage').style.display = 'block';
+                }
+                
+                // إعادة تحميل البيانات
+                loadStudentData();
+            }
+        });
+
+        // تحميل البيانات عند فتح الصفحة
+        window.addEventListener('load', loadStudentData);
+    </script>
+</body>
+</html>

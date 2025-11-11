@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الإدارة - معرض الرسومات</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="main-header">
+        <h1>👩‍💼 لوحة الإدارة</h1>
+        <div class="subtitle">إدارة طلبات الرسم والطالبات</div>
+    </header>
+
+    <div class="container">
+        <div class="nav-container">
+            <div class="navigation">
+                <a href="index.html" class="nav-btn">الرئيسية</a>
+                <a href="register.html" class="nav-btn">إنشاء حساب</a>
+                <a href="gallery.html" class="nav-btn">المعرض</a>
+                <a href="admin.html" class="nav-btn active">لوحة الإدارة</a>
+            </div>
+        </div>
+
+        <div id="messageContainer"></div>
+
+        <!-- تسجيل الدخول -->
+        <div id="loginSection" class="card login-container">
+            <h2 style="text-align: center; color: var(--primary); margin-bottom: 2rem;">دخول الإدارة</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 2rem;">
+                هذي الصفحة خاصة بي (صاحبة المشروع) عشان أدار الطلبات والرسومات
+            </p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">اسم المستخدم:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">كلمة المرور:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">دخول الإدارة</button>
+            </form>
+        </div>
+
+        <!-- لوحة الإدارة -->
+        <div id="adminPanel" class="card" style="display: none;">
+            <h2 style="text-align: center; color: var(--primary); margin-bottom: 2rem;">لوحة الإدارة - مشروع التخرج</h2>
+            
+            <div class="stats-grid" id="statsGrid">
+                <!-- الإحصائيات تظهر هنا -->
+            </div>
+            
+            <div class="card">
+                <h3 style="color: var(--primary); margin-bottom: 1.5rem;">قائمة الطالبات والطلبات</h3>
+                <div style="overflow-x: auto;">
+                    <table class="admin-table" id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>رقم الجوال</th>
+                                <th>طلب رسمة</th>
+                                <th>المعلومات</th>
+                                <th>حالة الرسمة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <!-- البيانات تظهر هنا -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-secondary" onclick="logout()">تسجيل الخروج</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        const ADMIN_USERNAME = 'admin';
+        const ADMIN_PASSWORD = 'admin123';
+
+        function checkAuth() {
+            return localStorage.getItem('adminLoggedIn') === 'true';
+        }
+
+        function login(username, password) {
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                localStorage.setItem('adminLoggedIn', 'true');
+                showAdminPanel();
+                return true;
+            }
+            return false;
+        }
+
+        function logout() {
+            localStorage.removeItem('adminLoggedIn');
+            showLoginForm();
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+
+        function showAdminPanel() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            renderAdminPanel();
+        }
+
+        function renderAdminPanel() {
+            const students = galleryApp.getAllStudents();
+            
+            // الإحصائيات
+            const totalStudents = students.length;
+            const drawingRequests = students.filter(s => s.wants_drawing).length;
+            const completedInfo = students.filter(s => s.info_completed).length;
+            const completedDrawings = students.filter(s => s.drawing_completed).length;
+
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${totalStudents}</div>
+                    <div class="stat-label">إجمالي المسجلات</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${drawingRequests}</div>
+                    <div class="stat-label">طلبات الرسم</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${completedInfo}</div>
+                    <div class="stat-label">مكتملة المعلومات</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${completedDrawings}</div>
+                    <div class="stat-label">الرسومات المكتملة</div>
+                </div>
+            `;
+
+            // جدول الطالبات
+            document.getElementById('studentsTableBody').innerHTML = students.map(student => `
+                <tr>
+                    <td>${student.name}</td>
+                    <td>${student.phone || 'غير محدد'}</td>
+                    <td>${student.wants_drawing ? '✅ نعم' : '❌ لا'}</td>
+                    <td>
+                        <span class="${student.info_completed ? 'status-complete' : 'status-incomplete'}">
+                            ${student.info_completed ? 'مكتملة' : 'غير مكتملة'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="${student.drawing_completed ? 'status-complete' : 'status-incomplete'}">
+                            ${student.drawing_completed ? 'مكتملة' : 'قيد الانتظار'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;" 
+                                onclick="editStudent(${student.id})">عرض/تعديل</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editStudent(studentId) {
+            window.location.href = `admin-student.html?id=${studentId}`;
+        }
+
+        // تسجيل الدخول
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (login(username, password)) {
+                showMessage('تم تسجيل الدخول بنجاح!', 'success');
+            } else {
+                showMessage('اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
+            }
+        });
+
+        // التحقق من التسجيل عند تحميل الصفحة
+        window.addEventListener('load', function() {
+            if (checkAuth()) {
+                showAdminPanel();
+            } else {
+                showLoginForm();
+            }
+        });
+    </script>
+</body>
+</html>
